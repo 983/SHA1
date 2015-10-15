@@ -1,6 +1,9 @@
 #include <stdint.h>
 #include <string.h>
 
+#define SHA1_HEX_SIZE (40 + 1)
+#define SHA1_BASE64_SIZE (28 + 1)
+
 class sha1 {
 private:
 
@@ -149,7 +152,6 @@ public:
     uint8_t buf[64];
     uint32_t i;
     uint64_t n_bits;
-    char hex[40 + 1];
 
     sha1(const char *text = NULL): i(0), n_bits(0){
         state[0] = 0x67452301;
@@ -201,6 +203,10 @@ public:
         while (i % 64 != 56) add_byte_dont_count_bits(0x00);
         for (int j = 7; j >= 0; j--) add_byte_dont_count_bits(n_bits >> j * 8);
 
+        return *this;
+    }
+
+    const sha1& print_hex(char *hex) const {
         // print hex
         int k = 0;
         for (int i = 0; i < 5; i++){
@@ -209,7 +215,36 @@ public:
             }
         }
         hex[k] = '\0';
+        return *this;
+    }
 
+    const sha1& print_base64(char *base64) const {
+        static const uint8_t *table = (const uint8_t*)
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+            "abcdefghijklmnopqrstuvwxyz"
+            "0123456789"
+            "+/";
+
+        uint32_t triples[7] = {
+            ((state[0] & 0xffffff00) >> 1*8),
+            ((state[0] & 0x000000ff) << 2*8) | ((state[1] & 0xffff0000) >> 2*8),
+            ((state[1] & 0x0000ffff) << 1*8) | ((state[2] & 0xff000000) >> 3*8),
+            ((state[2] & 0x00ffffff) << 0*8),
+            ((state[3] & 0xffffff00) >> 1*8),
+            ((state[3] & 0x000000ff) << 2*8) | ((state[4] & 0xffff0000) >> 2*8),
+            ((state[4] & 0x0000ffff) << 1*8),
+        };
+
+        for (int i = 0; i < 7; i++){
+            uint32_t x = triples[i];
+            base64[i*4 + 0] = table[(x >> 3*6) % 64];
+            base64[i*4 + 1] = table[(x >> 2*6) % 64];
+            base64[i*4 + 2] = table[(x >> 1*6) % 64];
+            base64[i*4 + 3] = table[(x >> 0*6) % 64];
+        }
+
+        base64[SHA1_BASE64_SIZE - 2] = '=';
+        base64[SHA1_BASE64_SIZE - 1] = '\0';
         return *this;
     }
 };
