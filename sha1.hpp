@@ -206,19 +206,23 @@ public:
         return *this;
     }
 
-    const sha1& print_hex(char *hex) const {
+    const sha1& print_hex(
+        char *hex,
+        bool zero_terminate = true,
+        const char *alphabet = "0123456789abcdef"
+    ) const {
         // print hex
         int k = 0;
         for (int i = 0; i < 5; i++){
             for (int j = 7; j >= 0; j--){
-                hex[k++] = "0123456789abcdef"[(state[i] >> j * 4) & 0xf];
+                hex[k++] = alphabet[(state[i] >> j * 4) & 0xf];
             }
         }
-        hex[k] = '\0';
+        if (zero_terminate) hex[k] = '\0';
         return *this;
     }
 
-    const sha1& print_base64(char *base64) const {
+    const sha1& print_base64(char *base64, bool zero_terminate = true) const {
         static const uint8_t *table = (const uint8_t*)
             "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
             "abcdefghijklmnopqrstuvwxyz"
@@ -244,7 +248,7 @@ public:
         }
 
         base64[SHA1_BASE64_SIZE - 2] = '=';
-        base64[SHA1_BASE64_SIZE - 1] = '\0';
+        if (zero_terminate) base64[SHA1_BASE64_SIZE - 1] = '\0';
         return *this;
     }
 };
