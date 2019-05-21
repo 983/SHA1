@@ -159,7 +159,7 @@ public:
         state[2] = 0x98BADCFE;
         state[3] = 0x10325476;
         state[4] = 0xC3D2E1F0;
-        add(text);
+        if (text) add(text);
     }
 
     sha1& add(uint8_t x){
@@ -194,6 +194,7 @@ public:
     }
 
     sha1& add(const char *text){
+        if (!text) return *this;
         return add(text, strlen(text));
     }
 
