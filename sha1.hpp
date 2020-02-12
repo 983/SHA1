@@ -1,5 +1,5 @@
-#include <stdint.h>
-#include <string.h>
+#include <cstdint>
+#include <cstring>
 
 #define SHA1_HEX_SIZE (40 + 1)
 #define SHA1_BASE64_SIZE (28 + 1)
